@@ -6,11 +6,9 @@ spring:
         druid:
             # 主库数据源
             master:
-                url: jdbc:mysql://101.42.171.184:1959/evehelper?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowMultiQueries=true
+                url: jdbc:mysql://127.0.0.1:3306/evehelper?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowMultiQueries=true
                 username: root
-                password: int_nero_2287
-#                password: eZ@nZyueysZ1EcvYg2nZEot43aNf9zosOkXREWhZyNor!1czsjrzm8@%nr25Wq*T%!ncdedZ%QaFGHfN1J%tlU6RlC^#GOk6T#U8w3uiizb1KE%%yiUqUd$Mgbtc#15&cU<>P0gzFM0#V7KtF3fh7#~8gxarXDC9JRS@dNvKJfEQm><7dc2ymZdgB5fGJXECOwOyqe
-#
+                password: 123456
             # 从库数据源s
             slave:
                 # 从数据源开关/默认关闭
