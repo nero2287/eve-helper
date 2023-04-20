@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD com.ruoyi.Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.EVEhelper.mapper.character.TranquilityCharacterMapper">
+    <resultMap id="character" type="Character">
+        <result property="character_id"       column="character_id"/>
+        <result property="alliance_id"        column="alliance_id"/>
+        <result property="bloodline_id"       column="bloodline_id"/>
+        <result property="birthday"           column="birthday"/>
+        <result property="corporation_id"     column="corporation_id"/>
+        <result property="gender"             column="gender"/>
+        <result property="name"               column="name"/>
+        <result property="race_id"            column="race_id"/>
+        <result property="security_status"    column="security_status"/>
+    </resultMap>
+
+    <select id="checkCharacterUnique" resultType="Integer">
+        select count(character_id) from tranquility_character where character_id = #{character_id};
+    </select>
+    <insert id="cacheCharacterInfo">
+        insert into serenity_character(character_id,alliance_id,birthday,bloodline_id,corporation_id,gender,`name`,race_id,security_status) values
+        <foreach collection="list" item="character" separator=",">
+            (
+            #{character.character_id},
+            #{character.alliance_id},
+            #{character.birthday},
+            #{character.bloodline_id},
+            #{character.corporation_id},
+            #{character.gender},
+            #{character.name},
+            #{character.race_id},
+            #{character.security_status}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getCharacterNameByCharacterId" resultType="character">
+        select * from serenity_character where character_id = #{character_id};
+    </select>
+</mapper>

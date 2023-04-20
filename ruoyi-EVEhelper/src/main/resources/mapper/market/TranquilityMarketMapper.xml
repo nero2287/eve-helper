@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD com.ruoyi.Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.EVEhelper.mapper.market.TranquilityMarketsMapper">
+    <resultMap type="MarketTypesGroup" id="groups">
+        <result property="description" column="description"/>
+        <result property="market_group_id" column="market_group_id"/>
+        <result property="name" column="name"/>
+        <result property="parent_group_id" column="parent_group_id"/>
+        <result property="types" column="types"/>
+        <result property="picture" column="picture"/>
+    </resultMap>
+    <insert id="cacheTranquilityMarketGroups">
+        insert into tranquility_market_types_group(description,market_group_id,`name`,parent_group_id,types,picture) values
+        <foreach collection="list" item="group" separator=",">
+            (
+                #{group.description},
+                #{group.market_group_id},
+                #{group.name},
+                #{group.parent_group_id},
+                #{group.types},
+                #{group.picture}
+            )
+        </foreach>
+    </insert>
+
+    <select id="checkTranquilityGroupUnique" resultType="Integer">
+        select count(market_group_id) from tranquility_market_types_group where market_group_id = #{market_group_id};
+    </select>
+
+    <select id="getTranquilityMarketGroupsByParentGroups" resultMap="groups">
+        select * from tranquility_market_types_group where parent_group_id = #{group_id};
+    </select>
+
+    <select id="getTranquilityMarketGroupByGroupId" resultMap="groups">
+        select * from tranquility_market_types_group where market_group_id = #{group_id};
+    </select>
+
+    <delete id="dropTranquilityMarketGroups">
+        delete from tranquility_market_types_group;
+    </delete>
+</mapper>

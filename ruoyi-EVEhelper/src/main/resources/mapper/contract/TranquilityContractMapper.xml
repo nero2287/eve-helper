@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD com.ruoyi.Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.EVEhelper.mapper.contract.TranquilityContractMapper">
+    <resultMap id="contract" type="Contract">
+        <result property="contract_id"              column="contract_id"/>
+        <result property="collateral"               column="collateral"/>
+        <result property="date_expired"             column="date_expired"/>
+        <result property="date_issued"              column="date_issued"/>
+        <result property="days_to_complete"         column="days_to_complete"/>
+        <result property="end_location_id"          column="end_location_id"/>
+        <result property="issuer_corporation_id"    column="issuer_corporation_id"/>
+        <result property="issuer_id"                column="issuer_id"/>
+        <result property="price"                    column="price"/>
+        <result property="reward"                   column="reward"/>
+        <result property="start_location_id"        column="start_location_id"/>
+        <result property="title"                    column="title"/>
+        <result property="type"                     column="type"/>
+        <result property="volume"                   column="volume"/>
+    </resultMap>
+
+    <resultMap id="contractItem" type="ContractItem">
+        <result property="is_blueprint_copy"    column="is_blueprint_copy"/>
+        <result property="is_included"          column="is_included"/>
+        <result property="item_id"              column="item_id"/>
+        <result property="material_efficiency"  column="material_efficiency"/>
+        <result property="time_efficiency"      column="time_efficiency"/>
+        <result property="quantity"             column="quantity"/>
+        <result property="record_id"            column="record_id"/>
+        <result property="runs"                 column="runs"/>
+        <result property="type_id"              column="type_id"/>
+    </resultMap>
+
+    <insert id="saveContractList">
+        insert into tranquility_contractInfo values
+        <foreach collection="list" item="newContractList" separator=",">
+        (
+            #{newContractList.contract_id},
+            #{newContractList.collateral},
+            #{newContractList.date_expired},
+            #{newContractList.date_issued},
+            #{newContractList.days_to_complete},
+            #{newContractList.end_location_id},
+            #{newContractList.issuer_corporation_id},
+            #{newContractList.issuer_id},
+            #{newContractList.price},
+            #{newContractList.reward},
+            #{newContractList.start_location_id},
+            #{newContractList.title},
+            #{newContractList.type},
+            #{newContractList.volume}
+        )
+        </foreach>
+    </insert>
+
+    <delete id="deleteContractList" >
+        delete from tranquility_contractInfo;
+    </delete>
+
+
+    <insert id="saveContractIncludedItem">
+        insert into tranquility_contractItem values
+        <foreach collection="list" item="contractItem" separator=",">
+        (
+            #{contractItem.contract_id},
+            #{contractItem.is_blueprint_copy},
+            #{contractItem.is_included},
+            #{contractItem.item_id},
+            #{contractItem.material_efficiency},
+            #{contractItem.time_efficiency},
+            #{contractItem.quantity},
+            #{contractItem.record_id},
+            #{contractItem.runs},
+            #{contractItem.type_id}
+        )
+        </foreach>
+    </insert>
+
+    <delete id="deleteContractItems">
+        delete from tranquility_contractItem;
+    </delete>
+
+    <select id="getContractList" resultMap="contract">
+        select * from tranquility_contractInfo where 1=1
+        <if test="type_name!=''">
+            and like concat('%', #{jobName}, '%')
+        </if>
+    </select>
+
+    <select id="getContractItemsByContractId" resultMap="contractItem">
+        select b.item_id,c.`name` as item_name,b.is_blueprint_copy,b.is_included,b.material_efficiency,b.time_efficiency,b.quantity,b.runs from tranquility_contractInfo a
+            left join tranquility_contractItem b on a.contract_id = b.contract_id
+            left join tranquility_universe_type c on b.type_id = c.type_id
+            where a.contract_id = #{contract_id};
+    </select>
+
+    <select id="getContractItemNamesByContractId" resultType="string">
+        select `name` from tranquility_universe_type where type_id in (select type_id from tranquility_contractitem where contract_id = #{contract_id});
+    </select>
+
+    <select id="getCharacterIdByContractInfo" resultType="string">
+        select issuer_id from tranquility_contractInfo GROUP BY issuer_id;
+    </select>
+
+    <select id="getContractItemByContractId">
+        select * from tranquility_contractItem where contract_id = #{contract_id});
+    </select>
+</mapper>

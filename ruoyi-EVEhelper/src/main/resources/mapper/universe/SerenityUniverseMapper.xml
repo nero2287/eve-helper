@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD com.ruoyi.Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.EVEhelper.mapper.universe.SerenityUniverseMapper">
+    <resultMap type="UniverseType" id="universeType">
+        <result property="type_id" column="type_id"/>
+        <result property="capacity" column="capacity"/>
+        <result property="description" column="description"/>
+        <result property="dogma_attributes" column="dogma_attributes"/>
+        <result property="dogma_effects" column="dogma_effects"/>
+        <result property="graphic_id" column="graphic_id"/>
+        <result property="group_id" column="group_id"/>
+        <result property="mass" column="mass"/>
+        <result property="name" column="name"/>
+        <result property="packaged_volume" column="packaged_volume"/>
+        <result property="portion_size" column="portion_size"/>
+        <result property="published" column="published"/>
+        <result property="radius" column="radius"/>
+        <result property="volume" column="volume"/>
+        <result property="picture" column="picture"/>
+    </resultMap>
+
+    <resultMap type="StarSystem" id="system">
+        <result property="system_id" column="system_id"/>
+        <result property="constellation_id" column="constellation_id"/>
+        <result property="name" column="name"/>
+        <result property="planets" column="planets"/>
+        <result property="position" column="position"/>
+        <result property="security_class" column="security_class"/>
+        <result property="security_status" column="security_status"/>
+        <result property="star_id" column="star_id"/>
+        <result property="stargates" column="stargates"/>
+        <result property="stations" column="stations"/>
+    </resultMap>
+    
+    <resultMap id="station" type="Stations">
+        <result property="station_id" column="station_id"/>
+        <result property="max_dockable_ship_volume" column="max_dockable_ship_volume"/>
+        <result property="name" column="name"/>
+        <result property="office_rental_cost" column="office_rental_cost"/>
+        <result property="owner" column="owner"/>
+        <result property="position" column="position"/>
+        <result property="race_id" column="race_id"/>
+        <result property="reprocessing_efficiency" column="reprocessing_efficiency"/>
+        <result property="reprocessing_stations_take" column="reprocessing_stations_take"/>
+        <result property="services" column="services"/>
+        <result property="system_id" column="system_id"/>
+        <result property="type_id" column="type_id"/>
+    </resultMap>
+
+    <resultMap id="group" type="UniverseTypesGroup">
+        <result property="category_id" column="category_id"/>
+        <result property="group_id" column="group_id"/>
+        <result property="name" column="name"/>
+        <result property="name" column="name"/>
+        <result property="published" column="published"/>
+        <result property="types" column="types"/>
+    </resultMap>
+
+    <select id="getSerenityMarketTypeListByTypeIdList" parameterType="String" resultMap="universeType">
+        select * from `serenity_universe_type` where 1=1
+        <if test="typesId.length>0">
+            and(
+            <foreach collection="typesId" item="id" separator="or">
+                type_id = #{id}
+            </foreach>
+            )
+        </if>
+    </select>
+
+    <insert id="cacheSerenityUniverseTypeInfo">
+        insert into serenity_universe_type(type_id,capacity,description,dogma_attributes,dogma_effects,graphic_id,icon_id,group_id,mass,market_group_id,`name`,packaged_volume,portion_size,published,radius,volume) values
+        <foreach collection="list" item="type" separator=",">
+            (
+                #{type.type_id},
+                #{type.capacity},
+                #{type.description},
+                #{type.dogma_attributes},
+                #{type.dogma_effects},
+                #{type.graphic_id},
+                #{type.icon_id},
+                #{type.group_id},
+                #{type.mass},
+                #{type.market_group_id},
+                #{type.name},
+                #{type.packaged_volume},
+                #{type.portion_size},
+                #{type.published},
+                #{type.radius},
+                #{type.volume}
+            )
+        </foreach>
+    </insert>
+
+    <select id="searchSerenityUniverseTypeByTypeName" resultMap="universeType">
+        select `name`,type_id from `serenity_universe_type`
+        where
+        `name` like concat('%', #{type_name}, '%')
+        and published = 1
+        and type_id in (
+        select SUBSTRING_INDEX
+        (SUBSTRING_INDEX(replace(replace(a.types, '[', ''), ']', ''),',',b.help_topic_id+1),',',-1)
+        as type_id
+        from
+        (select types from serenity_market_types_group where market_group_id in (select market_group_id from `serenity_universe_type` where `name` like concat('%', #{type_name}, '%') and published = 1))
+        as a
+        JOIN mysql.help_topic as b ON b.help_topic_id &lt; (length(a.types)-length(REPLACE(a.types,',',''))+1)
+        )
+    </select>
+
+    <select id="getSerenityUniverseTypeInfoByTypeId" resultMap="universeType">
+        select * from `serenity_universe_type` where type_id = #{typeId};
+    </select>
+
+    <delete id="dropSerenityUniverseTypes">
+        delete from serenity_universe_type;
+    </delete>
+
+    <delete id="dropSerenitySystem">
+        delete from serenity_universe_system;
+    </delete>
+
+    <insert id="cacheSerenitySystem">
+        insert into serenity_universe_system values
+        <foreach collection="list" item="system" separator=",">
+            (
+                #{system.system_id},
+                #{system.constellation_id},
+                #{system.name},
+                #{system.planets},
+                #{system.position},
+                #{system.security_class},
+                #{system.security_status},
+                #{system.star_id},
+                #{system.stargates},
+                #{system.stations}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getSerenityUniverseSystemInfoBySystemId" resultMap="system">
+        select * from serenity_universe_system where system_id = #{system_id};
+    </select>
+
+    <select id="getUniverseStations" resultType="string">
+        select stations from serenity_universe_system where stations != ''
+    </select>
+
+    <select id="checkUniverseStationUnique" resultType="Integer">
+        select count(station_id) from serenity_universe_station where station_id = #{station_id}
+    </select>
+
+    <insert id="cacheUniverseSystemStations">
+        insert into serenity_universe_station(station_id,max_dockable_ship_volume,`name`,office_rental_cost,owner,`position`,race_id,reprocessing_efficiency,reprocessing_stations_take,services,system_id,type_id) values
+        <foreach collection="list" item="station" separator=",">
+            (
+                #{station.station_id},
+                #{station.max_dockable_ship_volume},
+                #{station.name},
+                #{station.office_rental_cost},
+                #{station.owner},
+                #{station.position},
+                #{station.race_id},
+                #{station.reprocessing_efficiency},
+                #{station.reprocessing_stations_take},
+                #{station.services},
+                #{station.system_id},
+                #{station.type_id}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getUniverseStationSystemByStation_id" resultType="string">
+        select `name` from serenity_universe_system where system_id in(select system_id from  serenity_universe_station where station_id = #{station_id})
+    </select>
+
+    <select id="getUniverseGroupInfo" resultType="Integer">
+        select count(group_id) from serenity_universe_types_group;
+    </select>
+
+    <insert id="cacheUniverseTypeGroups">
+        insert into serenity_universe_types_group(category_id,group_id,`name`,published,types,picture) values
+        <foreach collection="list" item="groupInfo" separator=",">
+            (
+                #{groupInfo.category_id},
+                #{groupInfo.group_id},
+                #{groupInfo.name},
+                #{groupInfo.published},
+                #{groupInfo.types},
+                #{groupInfo.picture}
+            )
+        </foreach>
+    </insert>
+
+    <select id="checkUniverseTypeGroupUnique" resultType="Integer">
+        select count(group_id) from serenity_universe_types_group where group_id = #{group_id}
+    </select>
+
+    <select id="checkUniverseTypeBlueprint" resultType="String">
+        select  type_id from serenity_universe_type where `name` = #{name}
+    </select>
+
+    <update id="updateBlueprint">
+        update serenity_blueprint_types_group set types = #{types} where blueprint_group_id = #{blueprint_group_id};
+    </update>
+
+    <select id="getSerenityUniverseBlueprintTypeGroupsByParentGroupId" resultType="com.ruoyi.EVEhelper.domain.universe.BlueprintTypesGroup">
+        select * from serenity_blueprint_types_group where parent_blueprint_group_id = #{group_id}
+    </select>
+
+    <insert id="saveBlueprintTypeGroups">
+        insert into serenity_blueprint_types_group(description,`name`,parent_blueprint_group_id,types) values
+        <foreach collection="list" item="groupInfo" separator=",">
+            (
+            #{groupInfo.description},
+            #{groupInfo.name},
+            #{groupInfo.parent_blueprint_group_id},
+            #{groupInfo.types}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getBlueprintTypeGroupIdByGroupName" resultType="Integer">
+        select blueprint_group_id from serenity_blueprint_types_group where `name` = #{name} and description =#{description}
+    </select>
+
+    <select id="getUniverseTypeInfoByTypeName" resultMap="universeType">
+        select * from serenity_universe_type where `name` = #{type_name}  and published = 1
+    </select>
+
+    <select id="getUniverseTypeInfoListByTypeName" resultMap="universeType">
+        select * from serenity_universe_type where `name` like concat('%', #{type_name}, '%')
+    </select>
+</mapper>
